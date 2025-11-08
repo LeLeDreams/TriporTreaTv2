@@ -25,10 +25,12 @@ export default function Home() {
     });
 
     fetch(`http://localhost:8000/api/hotels?${query.toString()}`)
-      .then((res) => res.json())
-      .then((data) => setHotels(data))
-      .catch((err) => console.error("Error:", err));
-  }, [filters]);
+        .then((res) => res.json())
+        .then((response) => {
+          setHotels(response.data || []);  
+        })
+        .catch((err) => console.error("Error:", err));
+    }, [filters]);
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
