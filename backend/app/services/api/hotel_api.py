@@ -97,7 +97,7 @@ def get_hotels(
         )
 
         df = pd.read_sql("""
-            SELECT name, rating, price_min, price_max, price_avg
+            SELECT name, rating, price_min, price_max, price_avg, link
             FROM hotels
             WHERE price_min IS NOT NULL AND price_max IS NOT NULL
         """, conn)

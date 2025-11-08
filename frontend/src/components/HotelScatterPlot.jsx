@@ -5,6 +5,11 @@ import Plot from "react-plotly.js";
 export default function HotelScatterPlot({ filters }) {
   const [hotels, setHotels] = useState([]);
 
+  const colors = [
+    "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b",
+    "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+  ];
+
   useEffect(() => {
     if (!filters) return;
 
@@ -41,7 +46,7 @@ export default function HotelScatterPlot({ filters }) {
   });
 
   // === 3. Build one trace per cluster ===
-  const traces = ratingClusters.map((rating) => {
+  const traces = ratingClusters.map((rating, idx) => {
     const group = clusterMap[rating] || [];
     const n = group.length;
 
@@ -58,6 +63,7 @@ export default function HotelScatterPlot({ filters }) {
     const customdata = sortedGroup.map((h) => [
       h.price_min,
       h.price_max,
+      h.link || null
     ])
 
     return {
@@ -68,7 +74,7 @@ export default function HotelScatterPlot({ filters }) {
       customdata,
       mode: "markers",
       type: "scatter",
-      marker: { size: 10, opacity: 0.9 },
+      marker: { size: 10, opacity: 0.9, color: colors[idx % colors.length]},
       error_y: {
         type: "data",
         symmetric: false,
@@ -83,7 +89,7 @@ export default function HotelScatterPlot({ filters }) {
         "Avg Price: %{y:.0f}<br>" + 
         "Minimum Price: %{customdata[0]:.0f} <br>"+
         "Maximum Price: %{customdata[1]:.0f} <br>" +
-        '<a href="%{link}" target="_blank" style="color: #0066cc; text-decoration: underline;">View on TripAdvisor</a><br>'+
+        '<a href="%{[customdata[2]]]}" target="_blank" style="color: #0066cc; text-decoration: underline;">View on TripAdvisor</a><br>'+
         "<extra></extra>",
       name: `Rating ${rating}`,
     };
@@ -124,9 +130,23 @@ export default function HotelScatterPlot({ filters }) {
       layout={layout} 
       config={{ responsive: true }} 
       onClick={(event) => {
+        console.log("--- Plot Click Event ---");
         const point = event.points?.[0];
-        if (point?.customdata?.[2]){
-          window.open(point.customdata[2], "_blank");
+        console.log("Clicked point data:", point);
+
+        if(point){
+          console.log("Point's customdata:", point.customdata);
+          const url = point?.customdata?.[2];
+          console.log("Extracted URL:", url);
+
+          if (url){
+            console.log("Attempting to open URL:", url);
+            window.open(url, "_blank");
+          } else {
+            console.log("No URL found at customdata[2].");
+          }
+        } else {
+          console.log("Click event had no point data.");
         }
       }}
   />;
