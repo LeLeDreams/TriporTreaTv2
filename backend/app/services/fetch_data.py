@@ -32,6 +32,11 @@ async def fetch_hotels_all(city: str, api_key: str, api_host: str) -> Dict[str, 
             elif isinstance(payload.get("items"), list):
                 results = payload["items"]
 
+            if results:
+                print("DEBUG sample keys:", results[0].keys())
+                print("DEBUG sample hotel entry:", results[0])
+                break
+
             def coerce_id(h: dict) -> Union[int, str, None]:
                 cand = h.get("id") or h.get("location_id") or h.get("hotel_id") or h.get("hotelId")
                 if cand is None:
@@ -58,6 +63,7 @@ async def fetch_hotels_all(city: str, api_key: str, api_host: str) -> Dict[str, 
                     "lat": h.get("latitude"),
                     "lng": h.get("longitude"),
                 }
+            
 
             for h in results:
                 key = coerce_id(h)
