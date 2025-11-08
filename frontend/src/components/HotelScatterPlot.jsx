@@ -21,10 +21,12 @@ export default function HotelScatterPlot({ filters }) {
     });
 
     fetch(`http://localhost:8000/api/hotels?${query.toString()}`)
-      .then((res) => res.json())
-      .then((data) => setHotels(data))
-      .catch((err) => console.error("Error fetching hotel data:", err));
-  }, [filters]);
+        .then((res) => res.json())
+        .then((response) => {
+        setHotels(response.data || []);
+        })
+        .catch((err) => console.error("Error fetching hotel data:", err));
+    }, [filters]);
 
   if (hotels.length === 0) return <p>Loading...</p>;
 
