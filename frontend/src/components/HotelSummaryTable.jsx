@@ -1,7 +1,9 @@
 // src/components/HotelSummaryTable.jsx
 import React from 'react';
+import { useSession } from '../hooks/useSession';
 
 export default function HotelSummaryTable({ hotels, filters }) {
+  const { logClick } = useSession();
   if (!hotels?.length || !filters) return null;
 
   // === 1. Build rating clusters (same logic as scatterplot) ===
@@ -61,6 +63,11 @@ export default function HotelSummaryTable({ hotels, filters }) {
                   href={cheapest.link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (cheapest.id) logClick(cheapest.id); // LOG CLICK
+                    setTimeout(() => window.open(cheapest.link, "_blank"), 100);
+                  }}
                   style={styles.link}
                 >
                   {cheapest.name}

@@ -1,9 +1,11 @@
 // src/components/HotelScatterPlot.jsx
 import React, { useEffect, useState } from "react";
 import Plot from "react-plotly.js";
+import { useSession } from '../hooks/useSession';
 
 export default function HotelScatterPlot({ filters }) {
   const [hotels, setHotels] = useState([]);
+  const { logClick } = useSession();
 
   const colors = [
     "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b",
@@ -65,7 +67,8 @@ export default function HotelScatterPlot({ filters }) {
     const customdata = sortedGroup.map((h) => [
       h.price_min,
       h.price_max,
-      h.link || null
+      h.link || null,
+      h.id  //  hotel.id for click tracking
     ])
 
     return {
@@ -132,23 +135,18 @@ export default function HotelScatterPlot({ filters }) {
       layout={layout} 
       config={{ responsive: true }} 
       onClick={(event) => {
-        console.log("--- Plot Click Event ---");
         const point = event.points?.[0];
-        console.log("Clicked point data:", point);
+        if (!point) return;
 
-        if(point){
-          console.log("Point's customdata:", point.customdata);
-          const url = point?.customdata?.[2];
-          console.log("Extracted URL:", url);
+        const hotelId = point.customdata?.[3];  //  from customdata
+        const url = point.customdata?.[2];
 
-          if (url){
-            console.log("Attempting to open URL:", url);
-            window.open(url, "_blank");
-          } else {
-            console.log("No URL found at customdata[2].");
-          }
-        } else {
-          console.log("Click event had no point data.");
+        if (hotelId) {
+          logClick(hotelId);  // LOG CLICK
+        }
+
+        if (url) {
+          window.open(url, "_blank");
         }
       }}
   />;
