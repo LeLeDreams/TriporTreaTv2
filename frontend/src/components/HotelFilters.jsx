@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Slider from '@mui/material/Slider';
 
 export default function HotelFilterForm({ onSubmit, initialFilters = {} }) {
   const [filters, setFilters] = useState({
@@ -7,14 +8,6 @@ export default function HotelFilterForm({ onSubmit, initialFilters = {} }) {
     price_min:  initialFilters.price_min  ?? 0,
     price_max:  initialFilters.price_max  ?? 1000,
   });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: name.includes('rating') ? parseFloat(value) || 0 : parseInt(value) || 0
-    }));
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -72,65 +65,55 @@ export default function HotelFilterForm({ onSubmit, initialFilters = {} }) {
       `}</style>
 
       <form onSubmit={handleSubmit} className="hotel-filter-form">
+
+        {/* Rating Slider */}
         <div className="form-group">
           <label>
-            Min Rating
-            <input
-              type="number"
-              step="0.1"
-              name="rating_min"
-              value={filters.rating_min}
-              onChange={handleChange}
-              min="0"
-              max="5"
-              required
-            />
+            Rating Range: {filters.rating_min.toFixed(1)} – {filters.rating_max.toFixed(1)}
           </label>
 
-          <label>
-            Max Rating
-            <input
-              type="number"
-              step="0.1"
-              name="rating_max"
-              value={filters.rating_max}
-              onChange={handleChange}
-              min="0"
-              max="5"
-              required
-            />
-          </label>
+          <Slider
+            value={[filters.rating_min, filters.rating_max]}
+            min={0}
+            max={5}
+            step={0.1}
+            valueLabelDisplay="auto"
+            onChange={(e, newValue) => {
+            const updated = {
+              ...filters,
+              rating_min: newValue[0],
+              rating_max: newValue[1],
+            };
+            setFilters(updated);
+            onSubmit(updated); 
+          }}
+          />
         </div>
 
+        {/* Price Slider */}
         <div className="form-group">
           <label>
-            Min Price ($)
-            <input
-              type="number"
-              name="price_min"
-              value={filters.price_min}
-              onChange={handleChange}
-              min="0"
-              required
-            />
+            Price Range: ${filters.price_min} – ${filters.price_max}
           </label>
 
-          <label>
-            Max Price ($)
-            <input
-              type="number"
-              name="price_max"
-              value={filters.price_max}
-              onChange={handleChange}
-              min="0"
-              required
-            />
-          </label>
+          <Slider
+            value={[filters.price_min, filters.price_max]}
+            min={0}
+            max={5000}
+            step={10}
+            valueLabelDisplay="auto"
+            onChange={(e, newValue) => {
+          const updated = {
+            ...filters,
+            price_min: newValue[0],
+            price_max: newValue[1],
+          };
+          setFilters(updated);
+          onSubmit(updated); 
+        }}
+
+          />
         </div>
-
-        <button type="submit" className="search-btn">
-          Search Hotels
-        </button>
       </form>
     </>
   );
