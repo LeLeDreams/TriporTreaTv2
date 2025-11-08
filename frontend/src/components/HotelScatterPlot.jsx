@@ -54,11 +54,18 @@ export default function HotelScatterPlot({ filters }) {
 
     // Sort group by price_avg for consistent order
     const sortedGroup = [...group].sort((a, b) => a.price_avg - b.price_avg);
+    
+    const customdata = sortedGroup.map((h) => [
+      h.price_min,
+      h.price_max,
+    ])
 
     return {
       x: xPositions,
       y: sortedGroup.map((h) => h.price_avg), // true Y, no distortion
       text: sortedGroup.map((h) => h.name),
+      link: sortedGroup.map((h) => h.link),
+      customdata,
       mode: "markers",
       type: "scatter",
       marker: { size: 10, opacity: 0.9 },
@@ -73,7 +80,10 @@ export default function HotelScatterPlot({ filters }) {
       hovertemplate:
         "<b>%{text}</b><br>" +
         `Rating: ${rating}<br>` +
-        "Avg Price: %{y:.0f}<br>" +
+        "Avg Price: %{y:.0f}<br>" + 
+        "Minimum Price: %{customdata[0]:.0f} <br>"+
+        "Maximum Price: %{customdata[1]:.0f} <br>" +
+        '<a href="%{link}" target="_blank" style="color: #0066cc; text-decoration: underline;">View on TripAdvisor</a><br>'+
         "<extra></extra>",
       name: `Rating ${rating}`,
     };
@@ -109,5 +119,15 @@ export default function HotelScatterPlot({ filters }) {
     margin: { l: 60, r: 40, t: 60, b: 60 },
   };
 
-  return <Plot data={traces} layout={layout} config={{ responsive: true }} />;
+  return <Plot 
+      data={traces} 
+      layout={layout} 
+      config={{ responsive: true }} 
+      onClick={(event) => {
+        const point = event.points?.[0];
+        if (point?.customdata?.[2]){
+          window.open(point.customdata[2], "_blank");
+        }
+      }}
+  />;
 }
