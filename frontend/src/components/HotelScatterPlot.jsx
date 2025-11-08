@@ -1,11 +1,21 @@
 // src/components/HotelScatterPlot.jsx
 import React, { useEffect, useState } from "react";
-import Plot from "react-plotly.js";
+import Plotly from "plotly.js-gl2d-dist";
+import createPlotlyComponent from "react-plotly.js/factory";
 import { useSession } from '../hooks/useSession';
+
+const Plot = createPlotlyComponent(Plotly);
 
 export default function HotelScatterPlot({ filters }) {
   const [hotels, setHotels] = useState([]);
   const { logClick } = useSession();
+
+  const [tip, setTip] = useState({
+    show: false,
+    x: 0,
+    y: 0,
+    data: null,
+  });
 
   const colors = [
     "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b",
@@ -68,7 +78,8 @@ export default function HotelScatterPlot({ filters }) {
       h.price_min,
       h.price_max,
       h.link || null,
-      h.id  //  hotel.id for click tracking
+      h.id, //  hotel.id for click tracking
+      h.featured_image
     ])
 
     return {
@@ -78,7 +89,7 @@ export default function HotelScatterPlot({ filters }) {
       link: sortedGroup.map((h) => h.link),
       customdata,
       mode: "markers",
-      type: "scatter",
+      type: "scattergl",
       marker: { size: 10, opacity: 0.9, color: colors[idx % colors.length]},
       error_y: {
         type: "data",
@@ -88,15 +99,18 @@ export default function HotelScatterPlot({ filters }) {
         thickness: 1.8,
         width: 6,
       },
-      hovertemplate:
-        "<b>%{text}</b><br>" +
-        `Rating: ${rating}<br>` +
-        "Avg Price: %{y:.0f}<br>" + 
-        "Minimum Price: %{customdata[0]:.0f} <br>"+
-        "Maximum Price: %{customdata[1]:.0f} <br>" +
-        '<a href="%{[customdata[2]]]}" target="_blank" style="color: #0066cc; text-decoration: underline;">View on TripAdvisor</a><br>'+
-        "<extra></extra>",
+      hoverinfo: "none",
+      hovertemplate: null,
       name: `Rating ${rating}`,
+//      hovertemplate:
+//        "<b>%{text}</b><br>" +
+//        `Rating: ${rating}<br>` +
+//        "Avg Price: %{y:.0f}<br>" + 
+//        "Minimum Price: %{customdata[0]:.0f} <br>"+
+//        "Maximum Price: %{customdata[1]:.0f} <br>" +
+//        '<a href="%{[customdata[2]]]}" target="_blank" style="color: #0066cc; text-decoration: underline;">View on TripAdvisor</a><br>'+
+//        "<extra></extra>",
+//      name: `Rating ${rating}`,
     };
   });
 
@@ -130,24 +144,92 @@ export default function HotelScatterPlot({ filters }) {
     margin: { l: 60, r: 40, t: 60, b: 60 },
   };
 
-  return <Plot 
-      data={traces} 
-      layout={layout} 
-      config={{ responsive: true }} 
-      onClick={(event) => {
-        const point = event.points?.[0];
-        if (!point) return;
+  return (
+    <div style={{ position: "relative" }}>
+      <Plot
+        data={traces}
+        layout={layout}
+        config={{ responsive: true }}
+        onHover={(e) => {
+          const p = e.points?.[0];
+          if (!p) return;
 
-        const hotelId = point.customdata?.[3];  //  from customdata
-        const url = point.customdata?.[2];
+          // mimic Dash’s bbox by using the browser event coordinates
+          const clientX = e.event?.clientX ?? 0;
+          const clientY = e.event?.clientY ?? 0;
 
-        if (hotelId) {
-          logClick(hotelId);  // LOG CLICK
-        }
+          const [minP, maxP, url, id, img, ratingBin, name, avgP] = p.customdata || [];
 
-        if (url) {
-          window.open(url, "_blank");
-        }
-      }}
-  />;
+          setTip({
+            show: true,
+            x: clientX + 12, // small offset from cursor
+            y: clientY + 12,
+            data: {
+              id,
+              url,
+              img,
+              name,
+              rating: ratingBin,
+              avg: avgP ?? p.y,
+              min: minP,
+              max: maxP,
+            },
+          });
+        }}
+        onUnhover={() => setTip({ show: false, x: 0, y: 0, data: null })}
+        onClick={(e) => {
+          const p = e.points?.[0];
+          if (!p) return;
+          const [, , url, id] = p.customdata || [];
+          if (id) logClick(id);
+          if (url) window.open(url, "_blank");
+        }}
+      />
+
+      {/* Custom tooltip card (like Dash's dcc.Tooltip children) */}
+      {tip.show && tip.data && (
+        <div
+          style={{
+            position: "fixed",
+            left: tip.x,
+            top: tip.y,
+            zIndex: 1000,
+            background: "rgba(20,20,20,0.96)",
+            color: "#fff",
+            borderRadius: 12,
+            padding: 10,
+            width: 260,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+            pointerEvents: "none", // don’t block plot interactions
+            backdropFilter: "blur(2px)",
+          }}
+        >
+          {tip.data.img && (
+            <img
+              src={tip.data.img}
+              alt="Hotel"
+              style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 8, marginBottom: 8 }}
+              onError={(e) => { e.currentTarget.style.display = "none"; }}
+            />
+          )}
+
+          <div style={{ fontWeight: 700, marginBottom: 4, lineHeight: 1.2 }}>
+            {tip.data.name || "Hotel"}
+          </div>
+
+          <div style={{ fontSize: 13, opacity: 0.95, lineHeight: 1.35 }}>
+            Rating: {tip.data.rating?.toFixed?.(1) ?? "—"} <br />
+            Avg: ${Math.round(tip.data.avg ?? 0)} <br />
+            Min–Max: ${Math.round(tip.data.min ?? 0)}–${Math.round(tip.data.max ?? 0)}
+          </div>
+
+          {tip.data.url && (
+            <div style={{ marginTop: 6, fontSize: 12, opacity: 0.9 }}>
+              (click point to open TripAdvisor)
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
