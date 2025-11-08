@@ -1,16 +1,21 @@
 from fastapi import FastAPI, HTTPException, Query
 from typing import Any, Dict
-from app.services import fetch_data,etl
+from app.services import etl
 from app.services.api.hotel_api import router as hotel_router
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
-
+from app.services.api.res_api import router as res_router
+from app.services.etl_res import save_restaurants_to_db
 import os
 from dotenv import load_dotenv
+
+from app.services import fetch_data
+from app.services import fetch_data_res
 
 
 app = FastAPI(title="TripTreat API")
 app.include_router(hotel_router)
+app.include_router(res_router)
 
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
@@ -60,6 +65,29 @@ async def list_hotels(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/restaurants")
+async def list_restaurants(
+    city: str = Query(..., description="City to search (e.g., 'new york')")
+) -> Dict[str, Any]:
+
+    if not API_KEY:
+        raise HTTPException(status_code=500, detail="Missing API_KEY in environment")
+
+    try:
+        data = await fetch_data_res.fetch_res_all(
+            city=city,
+            api_key=API_KEY,
+            api_host=API_HOST
+        )
+
+        save_restaurants_to_db(data)
+
+        return {
+            "message": f"Fetched and saved {data['count']} restaurants for {city}"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/")
 def root():
