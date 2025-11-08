@@ -39,11 +39,12 @@ export default function Home() {
 
       {filters && (
         <>
-          <HotelSummaryTable hotels={hotels} filters={filters} logClick={logClick} />
           
           <div style={{ marginTop: '2rem' }}>
             <HotelScatterPlot filters={filters} logClick={logClick} />
           </div>
+
+          <HotelSummaryTable hotels={hotels} filters={filters} logClick={logClick} />
         </>
       )}
     </div>
