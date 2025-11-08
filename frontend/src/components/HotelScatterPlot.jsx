@@ -79,7 +79,10 @@ export default function HotelScatterPlot({ filters }) {
       h.price_max,
       h.link || null,
       h.id, //  hotel.id for click tracking
-      h.featured_image
+      h.featured_image,
+      rating,
+      h.name,
+      h.price_avg,
     ])
 
     return {
