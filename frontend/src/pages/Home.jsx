@@ -1,35 +1,51 @@
-import { useState } from 'react';
+// src/pages/Home.jsx
+import { useState, useEffect } from 'react';
 import HotelFilterForm from '../components/HotelFilters';
 import HotelScatterPlot from "../components/HotelScatterPlot";
+import HotelSummaryTable from "../components/HotelSummaryTable";
 
 export default function Home() {
-  const [submittedFilters, setSubmittedFilters] = useState(null);
+  const [filters, setFilters] = useState(null);
+  const [hotels, setHotels] = useState([]);
 
-  const handleSearch = (filters) => {
-    console.log('User submitted:', filters);
-    setSubmittedFilters(filters);
-    // TODO: call your API here later
+  const handleSearch = (f) => {
+    setFilters(f);
+    setHotels([]); // reset
   };
 
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Hotel</h1>
+  // === FETCH HOTELS ONCE (shared by both components) ===
+  useEffect(() => {
+    if (!filters) return;
 
-      {/* ✅ Filter Form */}
+    const query = new URLSearchParams({
+      min_price: filters.price_min,
+      max_price: filters.price_max,
+      min_rating: filters.rating_min,
+      max_rating: filters.rating_max,
+    });
+
+    fetch(`http://localhost:8000/api/hotels?${query.toString()}`)
+      .then((res) => res.json())
+      .then((data) => setHotels(data))
+      .catch((err) => console.error("Error:", err));
+  }, [filters]);
+
+  return (
+    <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
+      <h1>Hotel Finder</h1>
+
       <HotelFilterForm onSubmit={handleSearch} />
 
-      {/* ✅ Show submitted filters for debugging */}
-      {submittedFilters && (
-        <pre style={{ marginTop: '2rem', background: '#f5f5f5', padding: '1rem', borderRadius: '4px' }}>
-          {JSON.stringify(submittedFilters, null, 2)}
-        </pre>
-      )}
+      {filters && (
+        <>
+          {/* Table uses same data */}
+          <HotelSummaryTable hotels={hotels} filters={filters} />
 
-      {/* ✅ Render Plotly Chart Once Filters Are Submitted */}
-      {submittedFilters && (
-        <div style={{ marginTop: "2rem" }}>
-          <HotelScatterPlot filters={submittedFilters} />
-        </div>
+          {/* Plot uses same data */}
+          <div style={{ marginTop: '2rem' }}>
+            <HotelScatterPlot filters={filters} />
+          </div>
+        </>
       )}
     </div>
   );
