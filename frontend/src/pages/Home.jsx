@@ -3,17 +3,18 @@ import { useState, useEffect } from 'react';
 import HotelFilterForm from '../components/HotelFilters';
 import HotelScatterPlot from "../components/HotelScatterPlot";
 import HotelSummaryTable from "../components/HotelSummaryTable";
+import { useSession } from '../hooks/useSession';
 
 export default function Home() {
   const [filters, setFilters] = useState(null);
   const [hotels, setHotels] = useState([]);
+  const { sessionId, logClick } = useSession();  // ← NEW
 
   const handleSearch = (f) => {
     setFilters(f);
-    setHotels([]); // reset
+    setHotels([]);
   };
 
-  // === FETCH HOTELS ONCE (shared by both components) ===
   useEffect(() => {
     if (!filters) return;
 
@@ -25,12 +26,10 @@ export default function Home() {
     });
 
     fetch(`http://localhost:8000/api/hotels?${query.toString()}`)
-        .then((res) => res.json())
-        .then((response) => {
-          setHotels(response.data || []);  
-        })
-        .catch((err) => console.error("Error:", err));
-    }, [filters]);
+      .then((res) => res.json())
+      .then((response) => setHotels(response.data || []))
+      .catch((err) => console.error("Error:", err));
+  }, [filters]);
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
@@ -40,12 +39,10 @@ export default function Home() {
 
       {filters && (
         <>
-          {/* Table uses same data */}
-          <HotelSummaryTable hotels={hotels} filters={filters} />
-
-          {/* Plot uses same data */}
+          <HotelSummaryTable hotels={hotels} filters={filters} logClick={logClick} />
+          
           <div style={{ marginTop: '2rem' }}>
-            <HotelScatterPlot filters={filters} />
+            <HotelScatterPlot filters={filters} logClick={logClick} />
           </div>
         </>
       )}

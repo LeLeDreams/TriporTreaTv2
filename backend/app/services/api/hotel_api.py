@@ -13,6 +13,10 @@ class HotelFilter(BaseModel):
     price_min: Optional[float] = None
     price_max: Optional[float] = None
 
+class ClickLog(BaseModel):
+    session_id: str
+    hotel_id: int
+
 @router.post("/hotels/filter")
 def filter_hotels(filters: HotelFilter):
     sql = """
@@ -103,5 +107,18 @@ def get_hotels(
 
             return {"data": hotels, "total": len(hotels)}
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/clicks")
+def log_click(click: ClickLog):
+    """Log user click on hotel link"""
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO user_clicks (session_id, hotel_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                (click.session_id, click.hotel_id)
+            )
+        return {"status": "logged"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
