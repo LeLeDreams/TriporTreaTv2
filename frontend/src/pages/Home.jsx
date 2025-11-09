@@ -1,11 +1,14 @@
 // src/pages/Home.jsx
+import { borderRadius } from '@mui/system';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const BACKGROUND_IMAGE = '/nyc-skyline-2.jpg'; 
+const BACKGROUND_IMAGE = '/TriporTreatBG.png'; 
 const LOGO_IMAGE = '/logo.png'; 
 const DARK_BLUE = '#0F2035'; 
-const YELLOW_ACCENT = '#f5c542'; 
+const YELLOW_ACCENT = '#DFAA5B'; 
+const LOGO_TRIP = '/logoTrip.png';
+const LOGO_TREAT = '/logoTreat.png';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -18,16 +21,51 @@ export default function Home() {
     navigate('/restaurants');
   };
 
+  const HEADER_HEIGHT = '15vh'; // Height of the top dark blue bar
+  const FOOTER_HEIGHT = '15vh'; // Height of the bottom dark blue bar
+
   const styles = {
     container: {
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
       fontFamily: 'system-ui, sans-serif',
-      backgroundColor: DARK_BLUE,
+      backgroundColor: DARK_BLUE, // Default background for header/footer
     },
+    
+    // --- New Header Bar for Logo and Top Triangle ---
+    headerBar: {
+      height: HEADER_HEIGHT,
+      backgroundColor: DARK_BLUE,
+      position: 'relative', // To contain the logo and triangle
+    },
+    
+    logoContainer: {
+      width: '90px',
+      height: '90px',
+      borderRadius: '50%',
+      backgroundColor: 'white',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'absolute', // Positioned within the header bar
+      top: '50%', // Vertically center in the header
+      left: '50%',
+      transform: 'translate(-50%, -50%)', // Centering trick
+      zIndex: 2,
+      // Add a slight box shadow if desired for separation
+      boxShadow: '0 0 10px rgba(0, 0, 0, 0.3)',
+    },
+    logoImage: {
+      width: '80px',
+      height: '80px',
+      objectFit: 'contain',
+      borderRadius: '50%',
+    },
+    
+    // --- Hero Section (Image and Content) ---
     heroSection: {
-      flexGrow: 1,
+      flexGrow: 1, // Takes up remaining space
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
@@ -40,11 +78,11 @@ export default function Home() {
       top: 0,
       left: 0,
       width: '100%',
-      height: '100%',
+      height: '100%', 
       objectFit: 'cover',
       objectPosition: 'center',
       zIndex: 0,
-      filter: 'brightness(70%)',
+      filter: 'brightness(60%) contrast(60%) saturate(50%)', 
     },
     contentOverlay: {
       position: 'relative',
@@ -67,6 +105,8 @@ export default function Home() {
       fontWeight: 300,
       marginBottom: '30px',
     },
+    
+    // --- Button Styles (Adjusted for better icon/text alignment) ---
     buttonContainer: {
       display: 'flex',
       gap: '25px',
@@ -78,85 +118,74 @@ export default function Home() {
       border: 'none',
       borderRadius: '6px',
       cursor: 'pointer',
-      backgroundColor: YELLOW_ACCENT,
-      color: DARK_BLUE,
+      backgroundColor: YELLOW_ACCENT, // Buttons are already the same color
+      color: 'white', // Changed button text to white
       transition: 'background-color 0.2s',
       display: 'flex',
       alignItems: 'center',
+      justifyContent: 'center', 
       gap: '10px',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+      width: '150px', 
+      height: '50px',
     },
-    logoContainer: {
-      width: '90px',
-      height: '90px',
-      borderRadius: '50%',
-      backgroundColor: 'white',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'absolute',
-      top: '30px',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      zIndex: 2,
+    buttonIcon:{
+      width: '40px', // Increased icon size to be closer to button size
+      height: '40px',
+      objectFit: 'contain',
     },
-    logoImage: {
-        width: '80px',
-        height: '80px',
-        objectFit: 'contain'
+    
+    // --- New Footer Bar for Bottom Dark Area ---
+    footerBar: {
+      height: FOOTER_HEIGHT,
+      backgroundColor: DARK_BLUE,
+      position: 'relative',
     },
-    triangleTopRight: {
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      width: 0,
-      height: 0,
-      borderStyle: 'solid',
-      borderWidth: '0 300px 300px 0',
-      borderColor: `transparent ${DARK_BLUE} transparent transparent`,
-      zIndex: 1,
-    },
-    triangleBottomLeft: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      width: 0,
-      height: 0,
-      borderStyle: 'solid',
-      borderWidth: '300px 0 0 300px',
-      borderColor: `${DARK_BLUE} transparent transparent transparent`,
-      zIndex: 1,
-    }
   };
-
-  const TripIcon = ({ color }) => (
-    <svg width="20" height="20" fill={color} viewBox="0 0 24 24">
-      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-    </svg>
-  );
-
-  const TreatIcon = ({ color }) => (
-    <svg width="20" height="20" fill={color} viewBox="0 0 24 24">
-      <path d="M16 6v8c0 2.21-1.79 4-4 4s-4-1.79-4-4V6H6v8c0 3.31 2.69 6 6 6s6-2.69 6-6V6h-2zM14 2c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2z"/>
-    </svg>
-  );
-
 
   return (
     <div style={styles.container}>
-      {/* Logo Area */}
-      <div style={styles.logoContainer}>
-         <img src={LOGO_IMAGE} alt="Trip Treat Logo" style={styles.logoImage}/>
+      
+      {/* 1. Header Bar for Logo and Top Dark Area */}
+      <div style={styles.headerBar}>
+        {/* Logo Area (Moved up into the dark bar) */}
+        <div style={styles.logoContainer}>
+          <img src={LOGO_IMAGE} alt="Trip Treat Logo" style={styles.logoImage}/>
+        </div>
       </div>
 
+      {/* 2. Hero Section */}
       <div style={styles.heroSection}>
-        {/* Visual Shapes/Triangles */}
-        <div style={styles.triangleTopRight}></div>
-        <div style={styles.triangleBottomLeft}></div>
-
         {/* Background Image */}
         <img src={BACKGROUND_IMAGE} alt="City Skyline" style={styles.backgroundImage} />
         
+        {/* Visual Shapes/Triangles - Placed here to overlay the image */}
+        {/* Top-Right Triangle */}
+        <div style={{
+           position: 'absolute',
+           top: 0,
+           right: 0,
+           width: 0,
+           height: 0,
+           borderStyle: 'solid',
+           borderWidth: '0 150px 150px 0', 
+           borderColor: `transparent ${DARK_BLUE} transparent transparent`,
+           zIndex: 1,
+        }}></div>
+
+        {/* Bottom-Left Triangle (Flipped) */}
+        <div style={{
+           position: 'absolute',
+           bottom: 0,
+           left: 0,
+           width: 0,
+           height: 0,
+           borderStyle: 'solid',
+           borderWidth: '150px 0 0 150px', 
+           borderColor: `${DARK_BLUE} transparent transparent ${DARK_BLUE}`,
+           zIndex: 1,
+        }}></div>
+
         {/* Main Content */}
         <div style={styles.contentOverlay}>
           <h1 style={styles.mainTitle}>WELCOME TO TRIP | TREAT</h1>
@@ -168,7 +197,7 @@ export default function Home() {
               onClick={handleTripClick} 
               style={styles.button}
             >
-              <TripIcon color={DARK_BLUE} />
+              <img src={LOGO_TRIP} alt="Trip Icon" style={styles.buttonIcon} />
               Trip
             </button>
 
@@ -177,11 +206,15 @@ export default function Home() {
               onClick={handleTreatClick} 
               style={styles.button}
             >
-              <TreatIcon color={DARK_BLUE} />
+              <img src={LOGO_TREAT} alt="Treat Icon" style={styles.buttonIcon} />
               Treat
             </button>
           </div>
         </div>
+      </div>
+      
+      {/* 3. Footer Bar for Bottom Dark Area */}
+      <div style={styles.footerBar}>
       </div>
     </div>
   );

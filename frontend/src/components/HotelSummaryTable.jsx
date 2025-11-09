@@ -93,7 +93,7 @@ const styles = {
     overflow: 'hidden',
   },
   th: {
-    background: '#0066cc',
+    background: '#6A6DCD',
     color: 'white',
     padding: '0.8rem',
     textAlign: 'left',
