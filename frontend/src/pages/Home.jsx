@@ -4,11 +4,13 @@ import HotelFilterForm from '../components/HotelFilters';
 import HotelScatterPlot from "../components/HotelScatterPlot";
 import HotelSummaryTable from "../components/HotelSummaryTable";
 import { useSession } from '../hooks/useSession';
+import { useNavigate} from "react-router-dom";
 
 export default function Home() {
   const [filters, setFilters] = useState(null);
   const [hotels, setHotels] = useState([]);
-  const { sessionId, logClick } = useSession();  // ← NEW
+  const { sessionId, logClick } = useSession();
+  const navigate = useNavigate();
 
   const handleSearch = (f) => {
     setFilters(f);
@@ -35,6 +37,21 @@ export default function Home() {
     <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
       <h1>Hotel Finder</h1>
 
+      {/*Restaurant Page button*/}
+      <button
+        onClick={()=> navigate('/restaurants')}
+      style = {{
+        marginBottom: "1.5rem",
+          padding: "0.6rem 1rem",
+          background: "#0077cc",
+          color: "white",
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer"
+      }}
+        Find Restaurants
+      ></button>
+      
       <HotelFilterForm onSubmit={handleSearch} />
 
       {filters && (

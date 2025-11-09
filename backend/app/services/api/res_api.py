@@ -1,5 +1,5 @@
 # api/restaurant_api.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional
 from app.db.database import get_db_cursor
@@ -63,3 +63,51 @@ def filter_restaurants(filters: RestaurantFilter):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/api/restaurants")
+def get_restaurants(
+    min_price: int = Query(1),
+    max_price: int = Query(4),
+    min_rating: float = Query(0),
+    max_rating: float = Query(5),
+):
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    id, name, rating, reviews, price_range,
+                    price_min, price_max,
+                    link, lat, lng, city, featured_image,
+                    is_sponsored, has_delivery, is_premium,
+                    cuisines, menu_link, reservation_link
+                FROM restaurants
+                WHERE price_min >= %s AND price_max <= %s
+                  AND rating >= %s AND rating <= %s
+            """, (min_price, max_price, min_rating, max_rating))
+
+            rows = cursor.fetchall()
+            columns = [
+                "id", "name", "rating", "reviews", "price_range",
+                "price_min", "price_max",
+                "link", "lat", "lng", "city", "featured_image",
+                "is_sponsored", "has_delivery", "is_premium",
+                "cuisines", "menu_link", "reservation_link"
+            ]
+
+            restaurants = [dict(zip(columns, row)) for row in rows]
+
+            # Add derived price_avg
+            for r in restaurants:
+                if r["price_min"] and r["price_max"]:
+                    r["price_avg"] = (r["price_min"] + r["price_max"]) / 2
+                else:
+                    r["price_avg"] = None
+
+            # Round ratings
+            for r in restaurants:
+                if r["rating"]:
+                    r["rating"] = round(r["rating"], 1)
+
+            return {"data": restaurants, "total": len(restaurants)}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
