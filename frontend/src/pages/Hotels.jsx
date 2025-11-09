@@ -1,10 +1,10 @@
-// src/pages/Home.jsx
+// src/pages/Hotels.jsx
 import { useState, useEffect } from 'react';
 import HotelFilterForm from '../components/HotelFilters';
 import HotelScatterPlot from "../components/HotelScatterPlot";
 import HotelSummaryTable from "../components/HotelSummaryTable";
 
-export default function Home() {
+export default function Hotels() {
   const [filters, setFilters] = useState(null);
   const [hotels, setHotels] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
