@@ -1,4 +1,4 @@
-// src/pages/Home.jsx
+// src/pages/Hotels.jsx
 import { useState, useEffect } from 'react';
 import HotelFilterForm from '../components/HotelFilters';
 import HotelScatterPlot from "../components/HotelScatterPlot";
@@ -6,7 +6,7 @@ import HotelSummaryTable from "../components/HotelSummaryTable";
 import { useSession } from '../hooks/useSession';
 import { useNavigate} from "react-router-dom";
 
-export default function Home() {
+export default function Hotels() {
   const [filters, setFilters] = useState(null);
   const [hotels, setHotels] = useState([]);
   const { sessionId, logClick } = useSession();
