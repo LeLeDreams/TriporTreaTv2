@@ -1,7 +1,7 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 
-import Home from './pages/Home';
+import Home from './pages/Hotels';
 import Hotels from "./pages/Hotels"
 import Restaurant from './pages/Restaurant'
 import './index.css';   // optional – global styles
