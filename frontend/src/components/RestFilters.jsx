@@ -32,7 +32,7 @@ export default function RestaurantFilterForm({ onSubmit, initialFilters = {} }) 
 
       <form onSubmit={handleSubmit} className="restaurant-filter-form">
 
-        {/* Price Range Slider ONLY */}
+        {/* Price Range Slider */}
         <div>
           <label>
             Price: {priceLabel(filters.price_min)} – {priceLabel(filters.price_max)}
