@@ -51,7 +51,7 @@ export default function HotelFilterForm({ onSubmit, initialFilters = {} }) {
         .search-btn {
           align-self: flex-start;
           padding: 0.6rem 1.5rem;
-          background: #0066cc;
+          background: #6A6DCD;
           color: white;
           border: none;
           border-radius: 4px;
@@ -60,7 +60,7 @@ export default function HotelFilterForm({ onSubmit, initialFilters = {} }) {
           transition: background 0.2s;
         }
         .search-btn:hover {
-          background: #0055aa;
+          background: #6A6DCD;
         }
       `}</style>
 
